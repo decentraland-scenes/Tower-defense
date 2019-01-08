@@ -1,47 +1,37 @@
-import { CreepData, TrapData, TrapState, ButtonData, GameData, TilePos, Pool, Expiration } from "./components"
-import { creeps, traps, buttons, tiles } from "./components"
-import { SpawnCreeps, moveBlobs, killBlobs, PushButton} from "./systems";
+import { tiles, TilePos, spawnTile } from "./modules/tiles";
+import { creeps, CreepData, SpawnCreeps, moveBlobs } from "./modules/creeps";
+import { traps, TrapData, TrapState, killBlobs, placeTraps } from "./modules/traps";
+import { Expiration, ExpireDead } from "./modules/expiration";
+import { ButtonData, PushButton } from "./modules/button";
+import { Pool, GameData, UpdateScore } from "./modules/gameState";
 
 
 
-
-const MAX_TRAPS = 2
-const MAX_CREEPS = 4
-
-
-
+// component to store game data
+export const gameData = new GameData()
 
 //////////////////////////////////////////
-// Scenery
+// Initial entities
 
 
-const game = new Entity()
-export const gameData = new GameData()
-game.set(gameData)
-
-engine.addEntity(game)
-
-
-const floorMaterial = new Material
-floorMaterial.albedoTexture = "materials/WoodFloor.png"
 
 const groundMaterial = new Material
 groundMaterial.albedoTexture = "materials/StoneFloor.png"
 
 let ground = new Entity()
-ground.set(new Transform({
+ground.add(new Transform({
   position: new Vector3(10, 0, 10),
   rotation: Quaternion.Euler(90, 0, 0),
   scale: new Vector3(20, 20, 20)
 }))
-ground.set(new PlaneShape)
-ground.set(groundMaterial)
+ground.add(new PlaneShape)
+ground.add(groundMaterial)
 engine.addEntity(ground)
 
 
 let scoreBoard = new Entity()
-scoreBoard.set(new GLTFShape("models/ScoreRock/ScoreRock.gltf"))
-scoreBoard.set(new Transform({
+scoreBoard.add(new GLTFShape("models/ScoreRock/ScoreRock.gltf"))
+scoreBoard.add(new Transform({
   position: new Vector3(18.99, 0, 19)
 }))
 engine.addEntity(scoreBoard)
@@ -51,17 +41,17 @@ buttonMaterial.albedoColor = Color3.FromHexString("#990000")
 
 const button = new Entity()
 button.setParent(scoreBoard)
-button.set(new Transform({
+button.add(new Transform({
   position: new Vector3(0, 1, -0.3),
   rotation: Quaternion.Euler(90, 0, 0),
   scale: new Vector3(.05, .2, .05)
 }))
-button.set(new CylinderShape())
-button.set(buttonMaterial)
+button.add(new CylinderShape())
+button.add(buttonMaterial)
 let buttonData = new ButtonData(-0.3, -0.2)
-button.set(buttonData)
+button.add(buttonData)
 buttonData.label = "New Game"
-button.set(
+button.add(
   new OnClick(e => {
     //log("clicked")
     buttonData.pressed = true
@@ -73,54 +63,54 @@ engine.addEntity(button)
 
 let buttonLabel = new Entity()
 buttonLabel.setParent(scoreBoard)
-buttonLabel.set(new TextShape("New game"))
+buttonLabel.add(new TextShape("New game"))
 buttonLabel.get(TextShape).fontSize = 50
-buttonLabel.set(new Transform({
+buttonLabel.add(new Transform({
   position: new Vector3(0, 0.85, -.38)
 }))
 engine.addEntity(buttonLabel)
 
 let scoreText1 = new Entity()
 scoreText1.setParent(scoreBoard)
-scoreText1.set(new TextShape("humans"))
+scoreText1.add(new TextShape("humans"))
 scoreText1.get(TextShape).fontSize = 50
-scoreText1.set(new Transform({
+scoreText1.add(new Transform({
   position: new Vector3(-.4, .1, -.38)
 }))
 engine.addEntity(scoreText1)
 
 let scoreText2 = new Entity()
 scoreText2.setParent(scoreBoard)
-scoreText2.set(new TextShape("creps"))
+scoreText2.add(new TextShape("creps"))
 scoreText2.get(TextShape).fontSize = 50
-scoreText2.set(new Transform({
+scoreText2.add(new Transform({
   position: new Vector3(.4, .1, -.38)
 }))
 engine.addEntity(scoreText2)
 
 let scoreText3 = new Entity()
 scoreText3.setParent(scoreBoard)
-scoreText3.set(new TextShape("vs"))
+scoreText3.add(new TextShape("vs"))
 scoreText3.get(TextShape).fontSize = 100
-scoreText3.set(new Transform({
+scoreText3.add(new Transform({
   position: new Vector3(0, .35, -.38)
 }))
 engine.addEntity(scoreText3)
 
 export let scoreTextHumans = new Entity()
 scoreTextHumans.setParent(scoreBoard)
-scoreTextHumans.set(new TextShape(gameData.humanScore.toString()))
+scoreTextHumans.add(new TextShape(gameData.humanScore.toString()))
 scoreTextHumans.get(TextShape).fontSize = 200
-scoreTextHumans.set(new Transform({
+scoreTextHumans.add(new Transform({
   position: new Vector3(-.4, .35, -.38)
 }))
 engine.addEntity(scoreTextHumans)
 
 export let scoreTextCreeps = new Entity()
 scoreTextCreeps.setParent(scoreBoard)
-scoreTextCreeps.set(new TextShape(gameData.creepScore.toString()))
+scoreTextCreeps.add(new TextShape(gameData.creepScore.toString()))
 scoreTextCreeps.get(TextShape).fontSize = 200
-scoreTextCreeps.set(new Transform({
+scoreTextCreeps.add(new Transform({
   position: new Vector3(.4, .35, -.38)
 }))
 engine.addEntity(scoreTextCreeps)
@@ -164,150 +154,11 @@ function newGame(){
   log('creating tiles',tiles.entities.length)
 
   // add traps
-  placeTraps()
+  placeTraps(gameData)
 
 }
 
 
-
-////////////////////////
-// Object spawners & pools
-
-let tilePool = new Pool()
-let creepPool = new Pool(MAX_CREEPS)
-let trapPool = new Pool(MAX_TRAPS)
-
-export function spawnTrap(){
-  const trap = trapPool.getEntity()
-  engine.addEntity(trap) 
-
-  let posIndex = randomTrapPosition()
-
-  let pos = gameData.path[posIndex]
-  let t = trap.getOrCreate(Transform)
-  t.position.set(pos.x, 0.11, pos.y)
-  t.scale.setAll(0.5)
-  
-  if ( trap.has(TrapData)) {
-    trap.get(TrapData).reset(posIndex)
-  }
-  else{
-    trap.set(new TrapData(posIndex))
-  }
-
-  if ( trap.has(Expiration)){
-    trap.remove(Expiration)
-  }
-
-  trap.set(new GLTFShape("models/SpikeTrap/SpikeTrap.gltf"))
-  const spikeUp = new AnimationClip("SpikeUp", {loop: false, speed: 0.5})
-  const despawn= new AnimationClip("Despawn", {loop: false, speed: 1})
-  trap.get(GLTFShape).addClip(spikeUp)
-  trap.get(GLTFShape).addClip(despawn)
-  
-  let leftLever
-  let rightLever
-
-  if (!trap.children[1]){
-    leftLever = new Entity()  
-    rightLever = new Entity() 
-
-    let lt = leftLever.getOrCreate(Transform)
-    lt.position.set(-1.5, 0, 0)
-    lt.rotation.setEuler(0, 90, 0)
-
-    let rt = rightLever.getOrCreate(Transform)
-    rt.position.set(1.5, 0, 0)
-    rt.rotation.setEuler(0, 90, 0)
-
-    leftLever.setParent(trap)
-    rightLever.setParent(trap)
-   
-    leftLever.set(new OnClick(e => {
-      operateLeftLever(leftLever)
-    }))
-  
-    rightLever.set(new OnClick(e => {
-      operateRightLever(rightLever)
-    }))
-  }
-  else {
-    leftLever = trap.children[0]
-    rightLever = trap.children[1]
-  }
-
-  engine.addEntity(leftLever)
-  engine.addEntity(rightLever) 
-
-  leftLever.set(new GLTFShape("models/Lever/LeverBlue.gltf"))
-  const leverOffL = new AnimationClip("LeverOff", {loop: false, speed: 0.5})
-  const leverOnL= new AnimationClip("LeverOn", {loop: false, speed: 0.5})
-  const LeverDespawnL= new AnimationClip("LeverDeSpawn", {loop: false})
-  leftLever.get(GLTFShape).addClip(leverOffL)
-  leftLever.get(GLTFShape).addClip(leverOnL)
-  leftLever.get(GLTFShape).addClip(LeverDespawnL)
-  
-  rightLever.set(new GLTFShape("models/Lever/LeverRed.gltf"))
-  const leverOffR = new AnimationClip("LeverOff", {loop: false, speed: 0.5})
-  const leverOnR= new AnimationClip("LeverOn", {loop: false, speed: 0.5})
-  const LeverDespawnR= new AnimationClip("LeverDeSpawn", {loop: false})
-  rightLever.get(GLTFShape).addClip(leverOffR)
-  rightLever.get(GLTFShape).addClip(leverOnR)
-  rightLever.get(GLTFShape).addClip(LeverDespawnR) 
-
-  log("new trap", trapPool.pool.length)
-  
-}
-
-
-export function spawnTile(pos: Vector2) {
-  const ent = tilePool.getEntity()
-
-  let t = ent.getOrCreate(Transform)
-  t.position.set(pos.x, 0.1, pos.y)
-  t.rotation.setEuler(90, 0, 0)
-
-  let p = ent.getOrCreate(TilePos)
-  p.gridPos = pos
-
-  ent.set(new PlaneShape)
-  ent.set(floorMaterial)
-
-  engine.addEntity(ent)
-}
-
-
-export function spawnCreep(){
-  let ent = creepPool.getEntity()
-  if (!ent) return
-  log("new creep", creepPool.pool.length)
-
-  let firstTarget = new Vector3(gameData.path[1].x, 0.25, gameData.path[1].y)
-
-  let t = ent.getOrCreate(Transform)
-  t.position.set(10, 0.25, 1)
-  t.lookAt(firstTarget)
-
-  let d = ent.getOrCreate(CreepData)
-  d.isDead = false
-  d.pathPos = 0
-  d.lerpFraction = 0
-
-  if (!ent.has(GLTFShape)){
-    ent.set(new GLTFShape("models/BlobMonster/BlobMonster.gltf"))
-    const clipWalk = new AnimationClip("Walking", {loop: true})
-    const clipDie= new AnimationClip("Dying", {loop: false})
-    ent.get(GLTFShape).addClip(clipWalk)
-    ent.get(GLTFShape).addClip(clipDie)
-    clipWalk.play()
-  }
-
-  if ( ent.has(Expiration)){
-    ent.remove(Expiration)
-  }
-    
-  engine.addEntity(ent)
-}
 
 // Random path generator
 
@@ -387,72 +238,18 @@ export function getNeighborCount(path: Vector2[], position: Vector2)
   return count;
 }
 
-export function placeTraps(){
-  for (let i = 0; i < MAX_TRAPS; i ++)
-  {
-    spawnTrap()
-  }
-}
-
-// Random trap positions
-
-export function randomTrapPosition()
-  {
-    let counter = 0;
-    while(true)
-    {
-      if(counter++ > 1000)
-      {
-        throw new Error("Invalid trap position, try again");
-      }
-      let path = gameData.path
-      const posIndex = Math.floor(Math.random() * path.length)
-      const position = gameData.path[posIndex]
-      if( path.filter((p) => p.x == position.x - 1 && p.y == position.y).length == 0
-        && path.filter((p) => p.x == position.x + 1 && p.y == position.y).length == 0
-        && position.y > 2
-        && position.y < 18
-        && position.x > 2
-        && position.x < 18
-        && traps.entities.filter((t) => posIndex == t.get(TrapData).pathPos).length == 0
-      )
-      {
-        return posIndex 
-      }
-    } 
-  }
-
-  // Click interactions
 
 
-export function operateLeftLever(lever: Entity){
-  let data = lever.getParent().get(TrapData)
-  if(!data.leftLever){
-  //   data.leftLever = false
-  //   lever.get(GLTFShape).getClip("LeverOff").play()
-  // } else {
-    //log("clicked left lever")
-    data.leftLever = true
-    lever.get(GLTFShape).getClip("LeverOff").play()
-    if (data.rightLever){
-      data.trapState = TrapState.Fired
-      lever.getParent().get(GLTFShape).getClip("SpikeUp").play()
-    }
-  }
-}
+// Start systems
 
-export function operateRightLever(lever: Entity){
-  let data = lever.getParent().get(TrapData)
-  if(!data.rightLever){
-  //   data.rightLever = false
-  //   lever.get(GLTFShape).getClip("LeverOff").play()
-  // } else {
-    //log("clicked right lever")
-    data.rightLever = true
-    lever.get(GLTFShape).getClip("LeverOff").play()
-    if (data.leftLever){
-      data.trapState = TrapState.Fired
-      lever.getParent().get(GLTFShape).getClip("SpikeUp").play()
-    }
-  }
-}
+engine.addSystem(new PushButton())
+
+engine.addSystem(new SpawnCreeps(gameData))
+
+engine.addSystem(new moveBlobs(gameData))
+
+engine.addSystem(new killBlobs(gameData))
+
+engine.addSystem(new ExpireDead())
+
+engine.addSystem(new UpdateScore(gameData, scoreTextHumans, scoreTextCreeps ))
