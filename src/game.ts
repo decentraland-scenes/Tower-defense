@@ -7,7 +7,7 @@ import { Pool, GameData, UpdateScore } from "./modules/gameState";
 
 
 
-// component to store game data
+// object to store game data
 export const gameData = new GameData()
 
 //////////////////////////////////////////

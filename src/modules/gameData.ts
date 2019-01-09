@@ -1,6 +1,5 @@
 import { Expiration } from './expiration'
 
-@Component('gameData')
 export class GameData {
   won: boolean
   lost: boolean
