@@ -1,4 +1,4 @@
-import { Pool, GameData } from './gameState';
+import { Pool, GameData } from './gameData';
 import { Expiration } from './expiration';
 
 const MAX_CREEPS = 4

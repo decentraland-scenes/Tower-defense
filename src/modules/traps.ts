@@ -1,6 +1,6 @@
 import { Expiration } from "./expiration";
 import { creeps, CreepData } from "./creeps";
-import { GameData, Pool } from "./gameState";
+import { GameData, Pool } from "./gameData";
 
 const MAX_TRAPS = 2
 

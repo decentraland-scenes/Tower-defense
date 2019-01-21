@@ -3,7 +3,7 @@ import { creeps, CreepData, SpawnCreeps, moveBlobs } from "./modules/creeps";
 import { traps, TrapData, TrapState, killBlobs, placeTraps } from "./modules/traps";
 import { Expiration, ExpireDead } from "./modules/expiration";
 import { ButtonData, PushButton } from "./modules/button";
-import { Pool, GameData, UpdateScore } from "./modules/gameState";
+import { Pool, GameData, UpdateScore } from "./modules/gameData";
 
 
 

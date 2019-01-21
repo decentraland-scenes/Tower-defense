@@ -1,4 +1,4 @@
-import { Pool } from "./gameState";
+import { Pool } from "./gameData";
 
 @Component('tilePos')
 export class TilePos {
