@@ -43,7 +43,7 @@ export class Pool {
     let expiring = 0
     for (let i = 0; i < this.pool.length; i++) {
       const entity = this.pool[i]
-      if (entity.has(Expiration)) {
+      if (entity.hasComponent(Expiration)) {
         expiring += 1
       }
     }
