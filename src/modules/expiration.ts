@@ -21,7 +21,7 @@ export class ExpireDead implements ISystem {
         exp.timeLeft -= dt
         if (exp.timeLeft < 0) {
           ent.removeComponent(Expiration)
-          engine.removeEntity(ent, true)
+          engine.removeEntity(ent)
         }
       }
     }

@@ -14,9 +14,11 @@ export const gameData = new GameData()
 // Initial entities
 
 
+const groundTexture = new Texture("materials/StoneFloor.png")
 
-const groundMaterial = new Material
-groundMaterial.albedoTexture = "materials/StoneFloor.png"
+
+const groundMaterial = new Material()
+groundMaterial.albedoTexture = groundTexture
 
 let ground = new Entity()
 ground.addComponent(new Transform({
@@ -24,7 +26,7 @@ ground.addComponent(new Transform({
   rotation: Quaternion.Euler(90, 0, 0),
   scale: new Vector3(32, 32, 32)
 }))
-ground.addComponent(new PlaneShape)
+ground.addComponent(new PlaneShape())
 ground.addComponent(groundMaterial)
 engine.addEntity(ground)
 
@@ -139,7 +141,7 @@ function newGame(){
 
   // get rid of old traps and children
   while(traps.entities.length) {
-    engine.removeEntity(traps.entities[0], true)
+    engine.removeEntity(traps.entities[0])
   }
 
   // create random path

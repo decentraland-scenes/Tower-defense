@@ -10,8 +10,10 @@ export const tiles = engine.getComponentGroup(TilePos)
 
 let tilePool = new Pool()
 
+const floorTexture = new Texture("materials/WoodFloor.png")
+
 const floorMaterial = new Material
-floorMaterial.albedoTexture = "materials/WoodFloor.png"
+floorMaterial.albedoTexture = floorTexture
 
 
 export function spawnTile(pos: Vector2) {
