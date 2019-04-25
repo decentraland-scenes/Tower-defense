@@ -34,7 +34,8 @@ engine.addEntity(ground)
 let scoreBoard = new Entity()
 scoreBoard.addComponent(new GLTFShape("models/ScoreRock/ScoreRock.gltf"))
 scoreBoard.addComponent(new Transform({
-  position: new Vector3(30.9, 0, 30.9)
+  position: new Vector3(30, 0, 30),
+  rotation: Quaternion.Euler(0, 180, 0)
 }))
 engine.addEntity(scoreBoard)
 
@@ -44,13 +45,13 @@ buttonMaterial.albedoColor = Color3.FromHexString("#990000")
 const button = new Entity()
 button.setParent(scoreBoard)
 button.addComponent(new Transform({
-  position: new Vector3(0, 1, -0.3),
-  rotation: Quaternion.Euler(90, 0, 0),
+  position: new Vector3(0, 1, 0.3),
+  rotation: Quaternion.Euler(90, 180, 0),
   scale: new Vector3(.05, .2, .05)
 }))
 button.addComponent(new CylinderShape())
 button.addComponent(buttonMaterial)
-let buttonData = new ButtonData(-0.3, -0.2)
+let buttonData = new ButtonData(0.3, 0.2)
 button.addComponent(buttonData)
 buttonData.label = "New Game"
 button.addComponent(
@@ -68,7 +69,8 @@ buttonLabel.setParent(scoreBoard)
 buttonLabel.addComponent(new TextShape("New game"))
 buttonLabel.getComponent(TextShape).fontSize = 50
 buttonLabel.addComponent(new Transform({
-  position: new Vector3(0, 0.85, -.38)
+  position: new Vector3(0, 0.85, .38),
+  rotation: Quaternion.Euler(0, 180, 0)
 }))
 engine.addEntity(buttonLabel)
 
@@ -77,7 +79,8 @@ scoreText1.setParent(scoreBoard)
 scoreText1.addComponent(new TextShape("humans"))
 scoreText1.getComponent(TextShape).fontSize = 50
 scoreText1.addComponent(new Transform({
-  position: new Vector3(-.4, .1, -.38)
+  position: new Vector3(-.4, .1, .38),
+  rotation: Quaternion.Euler(0, 180, 0)
 }))
 engine.addEntity(scoreText1)
 
@@ -86,7 +89,8 @@ scoreText2.setParent(scoreBoard)
 scoreText2.addComponent(new TextShape("creps"))
 scoreText2.getComponent(TextShape).fontSize = 50
 scoreText2.addComponent(new Transform({
-  position: new Vector3(.4, .1, -.38)
+  position: new Vector3(.4, .1, .38),
+  rotation: Quaternion.Euler(0, 180, 0)
 }))
 engine.addEntity(scoreText2)
 
@@ -95,7 +99,8 @@ scoreText3.setParent(scoreBoard)
 scoreText3.addComponent(new TextShape("vs"))
 scoreText3.getComponent(TextShape).fontSize = 100
 scoreText3.addComponent(new Transform({
-  position: new Vector3(0, .35, -.38)
+  position: new Vector3(0, .35, .38),
+  rotation: Quaternion.Euler(0, 180, 0)
 }))
 engine.addEntity(scoreText3)
 
@@ -104,7 +109,8 @@ scoreTextHumans.setParent(scoreBoard)
 scoreTextHumans.addComponent(new TextShape(gameData.humanScore.toString()))
 scoreTextHumans.getComponent(TextShape).fontSize = 200
 scoreTextHumans.addComponent(new Transform({
-  position: new Vector3(-.4, .35, -.38)
+  position: new Vector3(-.4, .35, .38),
+  rotation: Quaternion.Euler(0, 180, 0)
 }))
 engine.addEntity(scoreTextHumans)
 
@@ -113,7 +119,8 @@ scoreTextCreeps.setParent(scoreBoard)
 scoreTextCreeps.addComponent(new TextShape(gameData.creepScore.toString()))
 scoreTextCreeps.getComponent(TextShape).fontSize = 200
 scoreTextCreeps.addComponent(new Transform({
-  position: new Vector3(.4, .35, -.38)
+  position: new Vector3(.4, .35, .38),
+  rotation: Quaternion.Euler(0, 180, 0)
 }))
 engine.addEntity(scoreTextCreeps)
 
