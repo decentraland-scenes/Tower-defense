@@ -156,10 +156,10 @@ export function spawnTrap(gameData: GameData){
   trap.addComponent(trapAnimator)
 
 
-  const spikeUp = new AnimationClip("SpikeUp")
+  const spikeUp = new animationClip("SpikeUp")
   spikeUp.looping = false
   spikeUp.speed = 0.5
-  const despawn= new AnimationClip("Despawn")
+  const despawn= new animationClip("Despawn")
   despawn.looping = false
   trapAnimator.addClip(spikeUp)
   trapAnimator.addClip(despawn)
@@ -202,13 +202,13 @@ export function spawnTrap(gameData: GameData){
   let leftAnimator = new Animator()
   leftLever.addComponent(leftAnimator)
   
-  const leverOffL = new AnimationClip("LeverOff")
+  const leverOffL = new animationClip("LeverOff")
   leverOffL.looping = false
   leverOffL.speed = 0.5
-  const leverOnL= new AnimationClip("LeverOn")
+  const leverOnL= new animationClip("LeverOn")
   leverOnL.looping = false
   leverOnL.speed = 0.5
-  const LeverDespawnL= new AnimationClip("LeverDeSpawn")
+  const LeverDespawnL= new animationClip("LeverDeSpawn")
   LeverDespawnL.looping = false
   leftAnimator.addClip(leverOffL)
   leftAnimator.addClip(leverOnL)
@@ -218,13 +218,13 @@ export function spawnTrap(gameData: GameData){
   let rightAnimator = new Animator()
   rightLever.addComponent(rightAnimator)
   
-  const leverOffR = new AnimationClip("LeverOff")
+  const leverOffR = new animationClip("LeverOff")
   leverOffR.looping = false
   leverOffR.speed = 0.5
-  const leverOnR= new AnimationClip("LeverOn")
+  const leverOnR= new animationClip("LeverOn")
   leverOnR.looping = false
   leverOnR.speed = 0.5
-  const LeverDespawnR= new AnimationClip("LeverDeSpawn")
+  const LeverDespawnR= new animationClip("LeverDeSpawn")
   LeverDespawnR.looping = false
   rightAnimator.addClip(leverOffR)
   rightAnimator.addClip(leverOnR)
