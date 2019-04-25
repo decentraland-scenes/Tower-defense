@@ -33,11 +33,11 @@ export class moveBlobs implements ISystem {
   }
   update() {
     for (let creep of creeps.entities) {
-      let creepData = creep.get(CreepData)
+      let creepData = creep.getComponent(CreepData)
       if (creepData.isDead) {
         break
       }
-      let transform = creep.get(Transform)
+      let transform = creep.getComponent(Transform)
       let path = this.game.path
       if (creepData.lerpFraction < 1) {
         const pos2d = Vector2.Lerp(
@@ -75,6 +75,9 @@ export class moveBlobs implements ISystem {
 
 let creepPool = new Pool(MAX_CREEPS)
 
+// reusable creep 3D model
+let creepModel = new GLTFShape("models/BlobMonster/BlobMonster.gltf")
+
 export function spawnCreep(spawnLocation: Vector2){
     let ent = creepPool.getEntity()
     if (!ent) return
@@ -82,26 +85,31 @@ export function spawnCreep(spawnLocation: Vector2){
   
     let firstTarget = new Vector3(spawnLocation.x, 0.25, spawnLocation.y)
   
-    let t = ent.getOrCreate(Transform)
+    let t = ent. getComponentOrCreate(Transform)
     t.position.set(10, 0.25, 1)
     t.lookAt(firstTarget)
   
-    let d = ent.getOrCreate(CreepData)
+    let d = ent. getComponentOrCreate(CreepData)
     d.isDead = false
     d.pathPos = 0
     d.lerpFraction = 0
   
-    if (!ent.has(GLTFShape)){
-      ent.add(new GLTFShape("models/BlobMonster/BlobMonster.gltf"))
-      const clipWalk = new AnimationClip("Walking", {loop: true})
-      const clipDie= new AnimationClip("Dying", {loop: false})
-      ent.get(GLTFShape).addClip(clipWalk)
-      ent.get(GLTFShape).addClip(clipDie)
+    ent.addComponentOrReplace(creepModel)
+
+    if (!ent.hasComponent(Animator)){
+      
+      const clipWalk = new AnimationClip("Walking")
+      const clipDie= new AnimationClip("Dying")
+      clipDie.looping = false
+      let anim = new Animator()
+      anim.addClip(clipWalk)
+      anim.addClip(clipDie)
       clipWalk.play()
+      ent.addComponent(anim)
     }
   
-    if ( ent.has(Expiration)){
-      ent.remove(Expiration)
+    if ( ent.hasComponent(Expiration)){
+      ent.removeComponent(Expiration)
     }
       
     engine.addEntity(ent)

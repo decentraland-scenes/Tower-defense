@@ -21,8 +21,8 @@ export const buttons = engine.getComponentGroup(ButtonData)
 export class PushButton implements ISystem {
     update(dt: number) {
       for (let button of buttons.entities) {
-        let transform = button.get(Transform)
-        let state = button.get(ButtonData)
+        let transform = button.getComponent(Transform)
+        let state = button.getComponent(ButtonData)
         if (state.pressed == true) {
           if (state.fraction < 1) {
             transform.position.z = Scalar.Lerp(
