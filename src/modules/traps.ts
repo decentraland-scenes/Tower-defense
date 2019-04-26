@@ -151,18 +151,28 @@ export function spawnTrap(gameData: GameData){
     trap.removeComponent(Expiration)
   }
 
-  trap.addComponent(new GLTFShape("models/SpikeTrap/SpikeTrap.gltf"))
-  let trapAnimator = new Animator()
-  trap.addComponent(trapAnimator)
+  if (!trap.hasComponent(GLTFShape)){
+    trap.addComponent(new GLTFShape("models/SpikeTrap/SpikeTrap.gltf"))
+  }
+
+  if ( trap.hasComponent(Animator)){
+    //trap.getComponent(Animator).getClip("Despawn").reset()
+    trap.getComponent(Animator).getClip("SpikeUp").reset()
+  } else {
+    let trapAnimator = new Animator()
+    trap.addComponent(trapAnimator)
+    const spikeUp = new AnimationClip("SpikeUp")
+    spikeUp.looping = false
+    spikeUp.speed = 0.5
+    const despawn= new AnimationClip("Despawn")
+    despawn.looping = false
+    trapAnimator.addClip(spikeUp)
+    trapAnimator.addClip(despawn)
+  }
+  
 
 
-  const spikeUp = new animationClip("SpikeUp")
-  spikeUp.looping = false
-  spikeUp.speed = 0.5
-  const despawn= new animationClip("Despawn")
-  despawn.looping = false
-  trapAnimator.addClip(spikeUp)
-  trapAnimator.addClip(despawn)
+  
   
   let leftLever
   let rightLever
@@ -189,46 +199,52 @@ export function spawnTrap(gameData: GameData){
     rightLever.addComponent(new OnPointerDown(e => {
       operateRightLever(rightLever)
     }))
+
+    leftLever.addComponent(new GLTFShape("models/Lever/LeverBlue.gltf"))
+    let leftAnimator = new Animator()
+    leftLever.addComponent(leftAnimator)
+    
+    const leverOffL = new AnimationClip("LeverOff")
+    leverOffL.looping = false
+    leverOffL.speed = 0.5
+    const leverOnL= new AnimationClip("LeverOn")
+    leverOnL.looping = false
+    leverOnL.speed = 0.5
+    const LeverDespawnL= new AnimationClip("LeverDeSpawn")
+    LeverDespawnL.looping = false
+    leftAnimator.addClip(leverOffL)
+    leftAnimator.addClip(leverOnL)
+    leftAnimator.addClip(LeverDespawnL)
+    
+    rightLever.addComponent(new GLTFShape("models/Lever/LeverRed.gltf"))
+    let rightAnimator = new Animator()
+    rightLever.addComponent(rightAnimator)
+    
+    const leverOffR = new AnimationClip("LeverOff")
+    leverOffR.looping = false
+    leverOffR.speed = 0.5
+    const leverOnR= new AnimationClip("LeverOn")
+    leverOnR.looping = false
+    leverOnR.speed = 0.5
+    const LeverDespawnR= new AnimationClip("LeverDeSpawn")
+    LeverDespawnR.looping = false
+    rightAnimator.addClip(leverOffR)
+    rightAnimator.addClip(leverOnR)
+    rightAnimator.addClip(LeverDespawnR)
   }
   else {
     leftLever = trap.children[0]
     rightLever = trap.children[1]
+
+    leftLever.getComponent(Animator).getClip("leverOn").reset()
+    rightLever.getComponent(Animator).getClip("leverOn").reset()
+
   }
 
   engine.addEntity(leftLever)
   engine.addEntity(rightLever) 
 
-  leftLever.addComponent(new GLTFShape("models/Lever/LeverBlue.gltf"))
-  let leftAnimator = new Animator()
-  leftLever.addComponent(leftAnimator)
-  
-  const leverOffL = new animationClip("LeverOff")
-  leverOffL.looping = false
-  leverOffL.speed = 0.5
-  const leverOnL= new animationClip("LeverOn")
-  leverOnL.looping = false
-  leverOnL.speed = 0.5
-  const LeverDespawnL= new animationClip("LeverDeSpawn")
-  LeverDespawnL.looping = false
-  leftAnimator.addClip(leverOffL)
-  leftAnimator.addClip(leverOnL)
-  leftAnimator.addClip(LeverDespawnL)
-  
-  rightLever.addComponent(new GLTFShape("models/Lever/LeverRed.gltf"))
-  let rightAnimator = new Animator()
-  rightLever.addComponent(rightAnimator)
-  
-  const leverOffR = new animationClip("LeverOff")
-  leverOffR.looping = false
-  leverOffR.speed = 0.5
-  const leverOnR= new animationClip("LeverOn")
-  leverOnR.looping = false
-  leverOnR.speed = 0.5
-  const LeverDespawnR= new animationClip("LeverDeSpawn")
-  LeverDespawnR.looping = false
-  rightAnimator.addClip(leverOffR)
-  rightAnimator.addClip(leverOnR)
-  rightAnimator.addClip(LeverDespawnR)
+ 
 
   log("new trap", trapPool.pool.length)
   
