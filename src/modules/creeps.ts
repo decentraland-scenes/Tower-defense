@@ -76,7 +76,7 @@ export class moveBlobs implements ISystem {
 let creepPool = new Pool(MAX_CREEPS)
 
 // reusable creep 3D model
-let creepModel = new GLTFShape("models/BlobMonster/BlobMonster.gltf")
+let creepModel = new GLTFShape("models/BlobMonster/BlobMonster.glb")
 
 export function spawnCreep(spawnLocation: Vector2){
     let ent = creepPool.getEntity()
