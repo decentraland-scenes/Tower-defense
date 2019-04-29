@@ -98,8 +98,8 @@ export function spawnCreep(spawnLocation: Vector2){
 
     if (!ent.hasComponent(Animator)){
       
-      const clipWalk = new AnimationClip("Walking")
-      const clipDie= new AnimationClip("Dying")
+      const clipWalk = new AnimationState("Walking")
+      const clipDie= new AnimationState("Dying")
       clipDie.looping = false
       let anim = new Animator()
       anim.addClip(clipWalk)
