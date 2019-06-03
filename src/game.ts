@@ -68,10 +68,12 @@ let buttonLabel = new Entity()
 buttonLabel.setParent(scoreBoard)
 buttonLabel.addComponent(new TextShape("New game"))
 buttonLabel.getComponent(TextShape).fontSize = 50
+buttonLabel.getComponent(TextShape).color = new Color3(0,1,0)
 buttonLabel.addComponent(new Transform({
   position: new Vector3(0, 0.85, .38),
   rotation: Quaternion.Euler(0, 180, 0)
 }))
+
 engine.addEntity(buttonLabel)
 
 let scoreText1 = new Entity()
