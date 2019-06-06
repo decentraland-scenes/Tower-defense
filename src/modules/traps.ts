@@ -192,11 +192,11 @@ export function spawnTrap(gameData: GameData){
     leftLever.setParent(trap)
     rightLever.setParent(trap)
    
-    leftLever.addComponent(new OnPointerDown(e => {
+    leftLever.addComponent(new OnClick(e => {
       operateLeftLever(leftLever)
     }))
   
-    rightLever.addComponent(new OnPointerDown(e => {
+    rightLever.addComponent(new OnClick(e => {
       operateRightLever(rightLever)
     }))
 
