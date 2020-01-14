@@ -1,16 +1,15 @@
-import { Expiration } from "./expiration";
-import { creeps, CreepData } from "./creeps";
-import { GameData, Pool } from "./gameData";
+import { Expiration } from './expiration'
+import { creeps, CreepData } from './creeps'
+import { GameData, Pool } from './gameData'
 
 const MAX_TRAPS = 3
 
-export const enum TrapState 
-{
+export const enum TrapState {
   Available,
   PreparedOne,
   PreparedBoth,
   Fired,
-  NotAvailable,
+  NotAvailable
 }
 
 // time for traps to be active
@@ -41,11 +40,10 @@ export class TrapData {
 
 export const traps = engine.getComponentGroup(TrapData)
 
-
 export class killBlobs implements ISystem {
   game: GameData
-  constructor(gameData){
-      this.game = gameData
+  constructor(gameData) {
+    this.game = gameData
   }
   update(dt: number) {
     for (let trap of traps.entities) {
@@ -57,6 +55,9 @@ export class killBlobs implements ISystem {
             .getComponent(Animator)
             .getClip('Despawn')
             .play()
+          for (let child in trap.children) {
+            engine.removeEntity(trap.children[child])
+          }
           trapData.trapState = TrapState.NotAvailable
           trap.addComponentOrReplace(new Expiration())
           spawnTrap(this.game)
@@ -93,194 +94,214 @@ export class killBlobs implements ISystem {
 
 let trapPool = new Pool(MAX_TRAPS)
 
-
-export function placeTraps(gameData: GameData){
-  for (let i = 0; i < MAX_TRAPS; i ++)
-  {
+export function placeTraps(gameData: GameData) {
+  for (let i = 0; i < MAX_TRAPS; i++) {
     spawnTrap(gameData)
   }
 }
 
 // Random trap positions
 
-export function randomTrapPosition(gameData: GameData){
-    let counter = 0;
-    while(true)
-    {
-      if(counter++ > 1000)
-      {
-        throw new Error("Invalid trap position, try again");
-      }
-      let path = gameData.path
-      const posIndex = Math.floor(Math.random() * path.length)
-      const position = gameData.path[posIndex]
-      if( path.filter((p) => p.x == position.x - 1 && p.y == position.y).length == 0
-        && path.filter((p) => p.x == position.x + 1 && p.y == position.y).length == 0
-        && position.y > 2
-        && position.y < 18
-        && position.x > 2
-        && position.x < 18
-        && traps.entities.filter((t) => posIndex == t.getComponent(TrapData).pathPos).length == 0
-      )
-      {
-        return posIndex 
-      }
-    } 
+export function randomTrapPosition(gameData: GameData) {
+  let counter = 0
+  while (true) {
+    if (counter++ > 1000) {
+      throw new Error('Invalid trap position, try again')
+    }
+    let path = gameData.path
+    const posIndex = Math.floor(Math.random() * path.length)
+    const position = gameData.path[posIndex]
+    if (
+      path.filter(p => p.x == position.x - 1 && p.y == position.y).length ==
+        0 &&
+      path.filter(p => p.x == position.x + 1 && p.y == position.y).length ==
+        0 &&
+      position.y > 2 &&
+      position.y < 18 &&
+      position.x > 2 &&
+      position.x < 18 &&
+      traps.entities.filter(t => posIndex == t.getComponent(TrapData).pathPos)
+        .length == 0
+    ) {
+      return posIndex
+    }
+  }
 }
 
-
-export function spawnTrap(gameData: GameData){
+export function spawnTrap(gameData: GameData) {
   const trap = trapPool.getEntity()
-  engine.addEntity(trap) 
+  engine.addEntity(trap)
 
   let posIndex = randomTrapPosition(gameData)
 
   let pos = gameData.path[posIndex]
-  let t = trap. getComponentOrCreate(Transform)
+  let t = trap.getComponentOrCreate(Transform)
   t.position.set(pos.x, 0.11, pos.y)
   t.scale.setAll(0.5)
-  
-  if ( trap.hasComponent(TrapData)) {
+
+  if (trap.hasComponent(TrapData)) {
     trap.getComponent(TrapData).reset(posIndex)
-  }
-  else{
+  } else {
     trap.addComponent(new TrapData(posIndex))
   }
 
-  if ( trap.hasComponent(Expiration)){
+  if (trap.hasComponent(Expiration)) {
     trap.removeComponent(Expiration)
   }
 
-  if (!trap.hasComponent(GLTFShape)){
-    trap.addComponent(new GLTFShape("models/SpikeTrap/SpikeTrap.gltf"))
+  if (!trap.hasComponent(GLTFShape)) {
+    trap.addComponent(new GLTFShape('models/SpikeTrap/SpikeTrap.gltf'))
   }
 
-  if ( trap.hasComponent(Animator)){
+  if (trap.hasComponent(Animator)) {
     //trap.getComponent(Animator).getClip("Despawn").reset()
-    trap.getComponent(Animator).getClip("SpikeUp").reset()
+    trap
+      .getComponent(Animator)
+      .getClip('SpikeUp')
+      .stop()
   } else {
     let trapAnimator = new Animator()
     trap.addComponent(trapAnimator)
-    const spikeUp = new AnimationState("SpikeUp")
+    const spikeUp = new AnimationState('SpikeUp')
     spikeUp.looping = false
     spikeUp.speed = 0.5
-    const despawn= new AnimationState("Despawn")
+    const despawn = new AnimationState('Despawn')
     despawn.looping = false
     trapAnimator.addClip(spikeUp)
     trapAnimator.addClip(despawn)
   }
-  
 
-
-  
-  
   let leftLever
   let rightLever
 
-  if (!trap.children[1]){
-    leftLever = new Entity()  
-    rightLever = new Entity() 
+  if (!trap.children[1]) {
+    leftLever = new Entity()
+    rightLever = new Entity()
 
-    let lt = leftLever. getComponentOrCreate(Transform)
+    let lt = leftLever.getComponentOrCreate(Transform)
     lt.position.set(-1.5, 0, 0)
     lt.rotation.setEuler(0, 90, 0)
 
-    let rt = rightLever. getComponentOrCreate(Transform)
+    let rt = rightLever.getComponentOrCreate(Transform)
     rt.position.set(1.5, 0, 0)
     rt.rotation.setEuler(0, 90, 0)
 
     leftLever.setParent(trap)
     rightLever.setParent(trap)
-   
-    leftLever.addComponent(new OnClick(e => {
-      operateLeftLever(leftLever)
-    }))
-  
-    rightLever.addComponent(new OnClick(e => {
-      operateRightLever(rightLever)
-    }))
 
-    leftLever.addComponent(new GLTFShape("models/Lever/LeverBlue.gltf"))
+    leftLever.addComponent(
+      new OnPointerDown(
+        e => {
+          operateLeftLever(leftLever)
+        },
+        { button: ActionButton.POINTER, hoverText: 'Activate' }
+      )
+    )
+
+    rightLever.addComponent(
+      new OnPointerDown(
+        e => {
+          operateRightLever(rightLever)
+        },
+        { button: ActionButton.POINTER, hoverText: 'Activate' }
+      )
+    )
+
+    leftLever.addComponent(new GLTFShape('models/Lever/LeverBlue.gltf'))
     let leftAnimator = new Animator()
     leftLever.addComponent(leftAnimator)
-    
-    const leverOffL = new AnimationState("LeverOff")
+
+    const leverOffL = new AnimationState('LeverOff')
     leverOffL.looping = false
     leverOffL.speed = 0.5
-    const leverOnL= new AnimationState("LeverOn")
+    const leverOnL = new AnimationState('LeverOn')
     leverOnL.looping = false
     leverOnL.speed = 0.5
-    const LeverDespawnL= new AnimationState("LeverDeSpawn")
+    const LeverDespawnL = new AnimationState('LeverDeSpawn')
     LeverDespawnL.looping = false
     leftAnimator.addClip(leverOffL)
     leftAnimator.addClip(leverOnL)
     leftAnimator.addClip(LeverDespawnL)
-    
-    rightLever.addComponent(new GLTFShape("models/Lever/LeverRed.gltf"))
+
+    rightLever.addComponent(new GLTFShape('models/Lever/LeverRed.gltf'))
     let rightAnimator = new Animator()
     rightLever.addComponent(rightAnimator)
-    
-    const leverOffR = new AnimationState("LeverOff")
+
+    const leverOffR = new AnimationState('LeverOff')
     leverOffR.looping = false
     leverOffR.speed = 0.5
-    const leverOnR= new AnimationState("LeverOn")
+    const leverOnR = new AnimationState('LeverOn')
     leverOnR.looping = false
     leverOnR.speed = 0.5
-    const LeverDespawnR= new AnimationState("LeverDeSpawn")
+    const LeverDespawnR = new AnimationState('LeverDeSpawn')
     LeverDespawnR.looping = false
     rightAnimator.addClip(leverOffR)
     rightAnimator.addClip(leverOnR)
     rightAnimator.addClip(LeverDespawnR)
-  }
-  else {
+  } else {
     leftLever = trap.children[0]
     rightLever = trap.children[1]
 
-    leftLever.getComponent(Animator).getClip("leverOn").reset()
-    rightLever.getComponent(Animator).getClip("leverOn").reset()
-
+    leftLever
+      .getComponent(Animator)
+      .getClip('leverOn')
+      .reset()
+    rightLever
+      .getComponent(Animator)
+      .getClip('leverOn')
+      .reset()
   }
 
   engine.addEntity(leftLever)
-  engine.addEntity(rightLever) 
+  engine.addEntity(rightLever)
 
- 
-
-  log("new trap", trapPool.pool.length)
-  
+  log('new trap', trapPool.pool.length)
 }
 
- // Click interactions
+// Click interactions
 
-
- export function operateLeftLever(lever: Entity){
+export function operateLeftLever(lever: Entity) {
   let data = lever.getParent().getComponent(TrapData)
-  if(!data.leftLever){
-  //   data.leftLever = false
-  //   lever.getComponent(GLTFShape).getClip("LeverOff").play()
-  // } else {
+  if (!data.leftLever) {
+    //   data.leftLever = false
+    //   lever.getComponent(GLTFShape).getClip("LeverOff").play()
+    // } else {
     //log("clicked left lever")
     data.leftLever = true
-    lever.getComponent(Animator).getClip("LeverOff").play()
-    if (data.rightLever){
+    lever
+      .getComponent(Animator)
+      .getClip('LeverOff')
+      .play()
+    if (data.rightLever) {
       data.trapState = TrapState.Fired
-      lever.getParent().getComponent(Animator).getClip("SpikeUp").play()
+      lever
+        .getParent()
+        .getComponent(Animator)
+        .getClip('SpikeUp')
+        .play()
     }
   }
 }
 
-export function operateRightLever(lever: Entity){
+export function operateRightLever(lever: Entity) {
   let data = lever.getParent().getComponent(TrapData)
-  if(!data.rightLever){
-  //   data.rightLever = false
-  //   lever.getComponent(GLTFShape).getClip("LeverOff").play()
-  // } else {
+  if (!data.rightLever) {
+    //   data.rightLever = false
+    //   lever.getComponent(GLTFShape).getClip("LeverOff").play()
+    // } else {
     //log("clicked right lever")
     data.rightLever = true
-    lever.getComponent(Animator).getClip("LeverOff").play()
-    if (data.leftLever){
+    lever
+      .getComponent(Animator)
+      .getClip('LeverOff')
+      .play()
+    if (data.leftLever) {
       data.trapState = TrapState.Fired
-      lever.getParent().getComponent(Animator).getClip("SpikeUp").play()
+      lever
+        .getParent()
+        .getComponent(Animator)
+        .getClip('SpikeUp')
+        .play()
     }
   }
 }

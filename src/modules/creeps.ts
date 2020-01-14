@@ -106,7 +106,9 @@ export function spawnCreep(spawnLocation: Vector2){
       anim.addClip(clipDie)
       clipWalk.play()
       ent.addComponent(anim)
-    }
+    } else {
+		ent.getComponent(Animator).getClip("Dying").stop()
+	}
   
     if ( ent.hasComponent(Expiration)){
       ent.removeComponent(Expiration)

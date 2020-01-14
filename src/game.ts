@@ -3,7 +3,7 @@ import { creeps, CreepData, SpawnCreeps, moveBlobs } from "./modules/creeps";
 import { traps, TrapData, TrapState, killBlobs, placeTraps } from "./modules/traps";
 import { Expiration, ExpireDead } from "./modules/expiration";
 import { ButtonData, PushButton } from "./modules/button";
-import { Pool, GameData, UpdateScore } from "./modules/gameData";
+import { Pool, GameData, UpdateScore, addScoreBoard } from "./modules/gameData";
 
 
 
@@ -31,106 +31,11 @@ ground.addComponent(groundMaterial)
 engine.addEntity(ground)
 
 
-let scoreBoard = new Entity()
-scoreBoard.addComponent(new GLTFShape("models/ScoreRock/ScoreRock.gltf"))
-scoreBoard.addComponent(new Transform({
-  position: new Vector3(30, 0, 30),
-  rotation: Quaternion.Euler(0, 180, 0)
-}))
-engine.addEntity(scoreBoard)
-
-let buttonMaterial = new Material()
-buttonMaterial.albedoColor = Color3.FromHexString("#990000") 
-
-const button = new Entity()
-button.setParent(scoreBoard)
-button.addComponent(new Transform({
-  position: new Vector3(0, 1, 0.3),
-  rotation: Quaternion.Euler(90, 180, 0),
-  scale: new Vector3(.05, .2, .05)
-}))
-button.addComponent(new CylinderShape())
-button.getComponent(CylinderShape).radiusTop = 1
-button.addComponent(buttonMaterial)
-let buttonData = new ButtonData(0.3, 0.2)
-button.addComponent(buttonData)
-buttonData.label = "New Game"
-button.addComponent(
-  new OnClick(e => {
-    //log("clicked")
-    buttonData.pressed = true
-    newGame()
-    // button up
-  })
-)
-engine.addEntity(button)
-
-let buttonLabel = new Entity()
-buttonLabel.setParent(scoreBoard)
-buttonLabel.addComponent(new TextShape("New game"))
-buttonLabel.getComponent(TextShape).fontSize = 2	
-buttonLabel.getComponent(TextShape).color = new Color3(0,1,0)
-buttonLabel.addComponent(new Transform({
-  position: new Vector3(0, 0.85, .38),
-  rotation: Quaternion.Euler(0, 180, 0)
-}))
-
-engine.addEntity(buttonLabel)
-
-let scoreText1 = new Entity()
-scoreText1.setParent(scoreBoard)
-scoreText1.addComponent(new TextShape("humans"))
-scoreText1.getComponent(TextShape).fontSize = 2.5
-scoreText1.addComponent(new Transform({
-  position: new Vector3(-.4, .1, .38),
-  rotation: Quaternion.Euler(0, 180, 0)
-}))
-engine.addEntity(scoreText1)
-
-let scoreText2 = new Entity()
-scoreText2.setParent(scoreBoard)
-scoreText2.addComponent(new TextShape("creps"))
-scoreText2.getComponent(TextShape).fontSize = 2.5
-scoreText2.addComponent(new Transform({
-  position: new Vector3(.4, .1, .38),
-  rotation: Quaternion.Euler(0, 180, 0)
-}))
-engine.addEntity(scoreText2)
-
-let scoreText3 = new Entity()
-scoreText3.setParent(scoreBoard)
-scoreText3.addComponent(new TextShape("vs"))
-scoreText3.getComponent(TextShape).fontSize = 2
-scoreText3.addComponent(new Transform({
-  position: new Vector3(0, .35, .38),
-  rotation: Quaternion.Euler(0, 180, 0)
-}))
-engine.addEntity(scoreText3)
-
-export let scoreTextHumans = new Entity()
-scoreTextHumans.setParent(scoreBoard)
-scoreTextHumans.addComponent(new TextShape(gameData.humanScore.toString()))
-scoreTextHumans.getComponent(TextShape).fontSize = 5
-scoreTextHumans.addComponent(new Transform({
-  position: new Vector3(-.4, .35, .38),
-  rotation: Quaternion.Euler(0, 180, 0)
-}))
-engine.addEntity(scoreTextHumans)
-
-export let scoreTextCreeps = new Entity()
-scoreTextCreeps.setParent(scoreBoard)
-scoreTextCreeps.addComponent(new TextShape(gameData.creepScore.toString()))
-scoreTextCreeps.getComponent(TextShape).fontSize = 5
-scoreTextCreeps.addComponent(new Transform({
-  position: new Vector3(.4, .35, .38),
-  rotation: Quaternion.Euler(0, 180, 0)
-}))
-engine.addEntity(scoreTextCreeps)
 
 ///////////////////////////////////
 // Startup
 
-function newGame(){
+export function newGame(){
 
   gameData.humanScore = 0
   gameData.creepScore = 0
@@ -251,6 +156,9 @@ export function getNeighborCount(path: Vector2[], position: Vector2)
 }
 
 
+// add scoreboard
+
+addScoreBoard()
 
 // Start systems
 
@@ -264,4 +172,4 @@ engine.addSystem(new killBlobs(gameData))
 
 engine.addSystem(new ExpireDead())
 
-engine.addSystem(new UpdateScore(gameData, scoreTextHumans, scoreTextCreeps ))
+engine.addSystem(new UpdateScore(gameData))
